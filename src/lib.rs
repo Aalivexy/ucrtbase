@@ -32,8 +32,6 @@ mod inner {
         fn GetModuleFileNameW(h: *mut c_void, b: *mut u16, s: u32) -> u32;
         fn GetModuleHandleW(n: *const u16) -> *mut c_void;
         fn LoadLibraryExW(n: *const u16, f: *mut c_void, g: u32) -> *mut c_void;
-        fn InitializeCriticalSectionAndSpinCount(cs: *mut c_void, sc: u32) -> u32;
-        #[cfg(target_arch = "aarch64")]
         fn InitializeCriticalSectionEx(cs: *mut c_void, sc: u32, flags: u32) -> u32;
     }
 
@@ -56,17 +54,6 @@ mod inner {
         unsafe { LoadLibraryExW(n, f, g) }
     }
 
-    #[cfg(not(target_arch = "aarch64"))]
-    #[unsafe(no_mangle)]
-    pub unsafe extern "C" fn __vcrt_InitializeCriticalSectionEx(
-        cs: *mut c_void,
-        sc: u32,
-        _flags: u32,
-    ) -> u32 {
-        unsafe { InitializeCriticalSectionAndSpinCount(cs, sc) }
-    }
-
-    #[cfg(target_arch = "aarch64")]
     #[unsafe(no_mangle)]
     pub unsafe extern "C" fn __vcrt_InitializeCriticalSectionEx(
         cs: *mut c_void,
