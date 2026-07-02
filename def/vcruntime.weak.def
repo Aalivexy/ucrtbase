@@ -1,0 +1,6 @@
+LIBRARY kernel32.dll
+EXPORTS
+__vcrt_GetModuleFileNameW=GetModuleFileNameW
+__vcrt_GetModuleHandleW=GetModuleHandleW
+__vcrt_LoadLibraryExW=LoadLibraryExW
+__vcrt_InitializeCriticalSectionEx=InitializeCriticalSectionEx

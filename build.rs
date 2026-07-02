@@ -13,16 +13,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         _ => return Ok(()),
     };
 
-    let out = PathBuf::from(std::env::var("OUT_DIR")?);
-    let defs = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?).join("def");
+    let out_dir = PathBuf::from(std::env::var("OUT_DIR")?);
+    let def_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?).join("def");
 
     let lib = find_msvc_tools::find_tool(arch, "lib.exe")
         .map(|t| t.path().to_path_buf())
         .expect("lib.exe not found; ensure Visual Studio or MSVC build tools are installed");
 
-    for name in ["vcruntime", "ucrt"] {
-        let def = defs.join(format!("{name}_{arch}.def"));
-        let output = out.join(format!("{name}.lib"));
+    for (name, def) in [
+        ("vcruntime", def_dir.join(format!("vcruntime_{arch}.def"))),
+        ("ucrt", def_dir.join(format!("ucrt_{arch}.def"))),
+    ]
+    .into_iter()
+    .chain((arch != "x86").then(|| ("vcruntime.weak", def_dir.join("vcruntime.weak.def"))))
+    {
+        let output = out_dir.join(format!("{name}.lib"));
         let status = Command::new(&lib)
             .args([
                 &format!("/def:{}", def.display()),
@@ -36,6 +41,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("cargo:rerun-if-changed={}", def.display());
     }
 
-    println!("cargo:rustc-link-search={}", out.display());
+    println!("cargo:rustc-link-search={}", out_dir.display());
     Ok(())
 }
