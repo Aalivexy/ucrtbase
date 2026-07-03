@@ -19,8 +19,27 @@ mod inner {
     #[unsafe(no_mangle)]
     pub unsafe extern "C" fn __telemetry_main_return_trigger(_: *mut c_void) {}
 
+    #[cfg(target_arch = "x86_64")]
+    mod inner_x86_64 {
+        use core::ffi::c_void;
+
+        #[link(name = "ucrtbase")]
+        unsafe extern "system" {
+            fn __NLG_Dispatch2(p1: *mut c_void, p2: *mut c_void, p3: i32, p4: i32);
+        }
+
+        #[unsafe(no_mangle)]
+        pub unsafe extern "C" fn _NLG_Notify(p1: *mut c_void, p2: *mut c_void, p3: i32) {
+            unsafe {
+                __NLG_Dispatch2(p1, p2, p3, 0x19930520);
+            }
+        }
+    }
+
     #[cfg(target_arch = "x86")]
-    mod inner {
+    mod inner_x86 {
+        use core::ffi::c_void;
+
         #[unsafe(no_mangle)]
         pub static __security_cookie: u32 = 0xBB40E64E;
 
