@@ -5,13 +5,13 @@ Link Rust programs to the system `ucrtbase.dll` and eliminate the MSVC redist de
 ## Usage
 
 ```sh
-cargo add --git https://github.com/Aalivexy/ucrtbase.git
+cargo add ucrtbase
 ```
 
 Or add to `Cargo.toml`:
 
 ```toml
-ucrtbase = { git = "https://github.com/Aalivexy/ucrtbase.git" }
+ucrtbase = "0.1"
 ```
 
 Once added, the crate automatically configures the linker to target the system `ucrtbase.dll`. No source code changes are required.
