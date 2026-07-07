@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .arg(format!("/machine:{arch}"))
             .status()?;
         if !status.success() {
-            return Err(format!("lib.exe exited with {status}").into());
+            return Err(format!("lib.exe exited with {status} while generating {name}.lib").into());
         }
         println!("cargo:rerun-if-changed={}", def.display());
     }
@@ -51,14 +51,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .arg(&asm)
             .status()?;
         if !status.success() {
-            return Err(format!("masm exited with {status}").into());
+            return Err(format!("masm exited with {status} while compiling weak.asm").into());
         }
         let status = Command::new(&lib)
             .arg(&out_dir.join("vcruntime.lib"))
             .arg(&obj)
             .status()?;
         if !status.success() {
-            return Err(format!("lib.exe exited with {status}").into());
+            return Err(format!("lib.exe exited with {status} while merging weak.obj").into());
         }
         println!("cargo:rerun-if-changed={}", asm.display());
     }
