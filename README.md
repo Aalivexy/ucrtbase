@@ -45,3 +45,7 @@ The following are not exported by `ucrtbase.dll` and therefore cannot be provide
 
 - `c11_atomic_support`
 - `c11_threads`
+
+## Special Thanks
+
+- [VC-LTL5](https://github.com/Chuyu-Team/VC-LTL5) — the project that inspired this crate.
