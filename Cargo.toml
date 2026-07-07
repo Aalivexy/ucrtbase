@@ -10,3 +10,4 @@ categories = ["development-tools::build-utils", "os::windows-apis"]
 
 [build-dependencies]
 find-msvc-tools = "0.1"
+object = "0.39"
