@@ -6,7 +6,7 @@ description = "Link Rust programs to the system `ucrtbase.dll` and eliminate the
 repository = "https://github.com/Aalivexy/ucrtbase"
 license = "MIT OR Apache-2.0"
 keywords = ["msvc", "ucrtbase", "vc-ltl", "vc-ltl5"]
-categories = ["build-utils", "windows-apis"]
+categories = ["development-tools::build-utils", "os::windows-apis"]
 
 [build-dependencies]
 find-msvc-tools = "0.1"
