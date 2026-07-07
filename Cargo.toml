@@ -2,6 +2,9 @@
 name = "ucrtbase"
 version = "0.1.0"
 edition = "2024"
+description = "Links Rust programs to system ucrtbase.dll and removes the MSVC redist dependency"
+repository = "https://github.com/Aalivexy/ucrtbase"
+license = "MIT OR Apache-2.0"
 
 [build-dependencies]
 find-msvc-tools = "0.1"
