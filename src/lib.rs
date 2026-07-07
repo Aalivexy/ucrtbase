@@ -34,7 +34,6 @@ mod inner {
     mod inner_x86_64 {
         use core::ffi::c_void;
 
-        #[link(name = "ucrtbase")]
         unsafe extern "system" {
             fn __NLG_Dispatch2(p1: *mut c_void, p2: *mut c_void, p3: i32, p4: i32);
         }

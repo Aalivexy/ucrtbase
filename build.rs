@@ -19,19 +19,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let lib = find_msvc_tools::find_tool(arch, "lib.exe")
         .map(|t| t.path().to_path_buf())
         .expect("lib.exe not found");
-    for name in ["vcruntime", "ucrt"] {
-        let def = root.join("def").join(format!("{name}_{arch}.def"));
-        let output = out_dir.join(format!("{name}.lib"));
-        let status = Command::new(&lib)
-            .arg(format!("/def:{}", def.display()))
-            .arg(format!("/out:{}", output.display()))
-            .arg(format!("/machine:{arch}"))
-            .status()?;
-        if !status.success() {
-            return Err(format!("lib.exe exited with {status} while generating {name}.lib").into());
-        }
-        println!("cargo:rerun-if-changed={}", def.display());
+    let def = root.join("def").join(format!("vcruntime_{arch}.def"));
+    let output = out_dir.join(format!("vcruntime.lib"));
+    let status = Command::new(&lib)
+        .arg(format!("/def:{}", def.display()))
+        .arg(format!("/out:{}", output.display()))
+        .arg(format!("/machine:{arch}"))
+        .status()?;
+    if !status.success() {
+        return Err(format!("lib.exe exited with {status} while generating vcruntime.lib").into());
     }
+    println!("cargo:rerun-if-changed={}", def.display());
 
     if arch != "x86" {
         let asm = root.join("asm").join("weak.asm");
