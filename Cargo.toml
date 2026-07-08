@@ -1,6 +1,6 @@
 [package]
 name = "ucrtbase"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Link Rust programs to the system `ucrtbase.dll` and eliminate the MSVC redist dependency"
 repository = "https://github.com/Aalivexy/ucrtbase"
