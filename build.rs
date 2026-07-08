@@ -17,30 +17,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?);
     let out_dir = PathBuf::from(std::env::var("OUT_DIR")?);
 
-    let lib = find_msvc_tools::find_tool(arch, "lib.exe")
+    let lib_exe = find_msvc_tools::find_tool(arch, "lib.exe")
         .map(|t| t.path().to_path_buf())
         .expect("lib.exe not found");
     let output = out_dir.join("vcruntime.lib");
+    let def_path = root.join("def").join(format!("vcruntime_{arch}.def"));
 
-    let status = Command::new(&lib)
-        .arg(format!(
-            "/def:{}",
-            root.join("def")
-                .join(format!("vcruntime_{arch}.def"))
-                .display(),
-        ))
+    let status = Command::new(&lib_exe)
+        .arg(format!("/def:{}", def_path.display()))
         .arg(format!("/out:{}", output.display()))
         .arg(format!("/machine:{arch}"))
         .status()?;
     if !status.success() {
         return Err(format!("lib.exe exited with {status} while generating vcruntime.lib").into());
     }
+    println!("cargo:rerun-if-changed={}", def_path.display());
 
     cc::Build::new().file(root.join("stubs.c")).compile("stubs");
-    Command::new(&lib)
+    let status = Command::new(&lib_exe)
         .arg(&output)
         .arg(out_dir.join("stubs.lib"))
         .status()?;
+    if !status.success() {
+        return Err(format!("lib.exe exited with {status} while merging stubs.lib").into());
+    }
     println!("cargo:rerun-if-changed={}", root.join("stubs.c").display());
 
     if arch == "x86" {
