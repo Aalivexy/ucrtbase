@@ -1,4 +1,5 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::process::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -19,47 +20,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let lib = find_msvc_tools::find_tool(arch, "lib.exe")
         .map(|t| t.path().to_path_buf())
         .expect("lib.exe not found");
-    let def = root.join("def").join(format!("vcruntime_{arch}.def"));
     let output = out_dir.join("vcruntime.lib");
+
     let status = Command::new(&lib)
-        .arg(format!("/def:{}", def.display()))
+        .arg(format!(
+            "/def:{}",
+            root.join("def")
+                .join(format!("vcruntime_{arch}.def"))
+                .display(),
+        ))
         .arg(format!("/out:{}", output.display()))
         .arg(format!("/machine:{arch}"))
         .status()?;
     if !status.success() {
         return Err(format!("lib.exe exited with {status} while generating vcruntime.lib").into());
     }
-    println!("cargo:rerun-if-changed={}", def.display());
 
-    if arch != "x86" {
-        let asm = root.join("asm").join("weak.asm");
-        let obj = out_dir.join("weak.obj");
-
-        let masm_exe = match arch {
-            "x64" => "ml64.exe",
-            _ => "armasm64.exe",
-        };
-        let masm = find_msvc_tools::find_tool(arch, masm_exe)
-            .map(|t| t.path().to_path_buf())
-            .expect("masm not found");
-
-        let status = Command::new(&masm)
-            .arg("/c")
-            .arg(format!("/Fo{}", obj.display()))
-            .arg(&asm)
-            .status()?;
-        if !status.success() {
-            return Err(format!("masm exited with {status} while compiling weak.asm").into());
-        }
-        let status = Command::new(&lib)
-            .arg(out_dir.join("vcruntime.lib"))
-            .arg(&obj)
-            .status()?;
-        if !status.success() {
-            return Err(format!("lib.exe exited with {status} while merging weak.obj").into());
-        }
-        println!("cargo:rerun-if-changed={}", asm.display());
-    }
+    cc::Build::new().file(root.join("stubs.c")).compile("stubs");
+    Command::new(&lib)
+        .arg(&output)
+        .arg(out_dir.join("stubs.lib"))
+        .status()?;
+    println!("cargo:rerun-if-changed={}", root.join("stubs.c").display());
 
     if arch == "x86" {
         fix_x86_name_type(&output)?;
@@ -70,10 +52,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn fix_x86_name_type(lib_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    use std::mem::offset_of;
+
     use object::LittleEndian as LE;
     use object::pe::{self, ImportObjectHeader};
     use object::read::archive::ArchiveFile;
-    use std::mem::offset_of;
 
     let data = std::fs::read(lib_path)?;
 

@@ -9,5 +9,6 @@ keywords = ["msvc", "ucrtbase", "vc-ltl", "vc-ltl5"]
 categories = ["development-tools::build-utils", "os::windows-apis"]
 
 [build-dependencies]
+cc = "1"
 find-msvc-tools = "0.1"
 object = "0.39"
